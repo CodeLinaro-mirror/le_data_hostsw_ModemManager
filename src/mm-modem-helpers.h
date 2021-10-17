@@ -572,4 +572,13 @@ gboolean mm_sim_parse_cpol_test_response (const gchar  *response,
  * and in order to avoid -Wtype-limits warnings. */
 #define MM_CLAMP_HIGH(x, high) (((x) > (high)) ? (high) : (x))
 
+/*****************************************************************************/
+/* Signal quality percentage from different sources */
+
+/* Limit the value betweeen [-113,-51] and scale it to a percentage */
+#define MM_RSSI_TO_QUALITY(rssi)                                   \
+    (guint8)(100 - ((CLAMP (rssi, -113, -51) + 51) * 100 / (-113 + 51)))
+
+/*****************************************************************************/
+
 #endif  /* MM_MODEM_HELPERS_H */
