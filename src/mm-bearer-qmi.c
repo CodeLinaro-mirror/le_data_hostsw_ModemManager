@@ -505,6 +505,7 @@ typedef struct {
 
     MMBearerMultiplexSupport       multiplex;
     QmiWdaDataAggregationProtocol  dap;
+    guint                          bind_mux_data_port_retry_count;
     guint                          mux_id;
     gchar                         *link_prefix_hint;
     gchar                         *link_name;
@@ -1373,6 +1374,9 @@ bind_data_port_ready (QmiClientWds *client,
     connect_context_step (task);
 }
 
+#define BIND_MUX_DATA_PORT_RETRY_COUNT_MAX (10)
+#define BIND_MUX_DATA_PORT_RETRY_SLEEP_US (1000000) /* 1 second */
+
 static void
 bind_mux_data_port_ready (QmiClientWds *client,
                           GAsyncResult *res,
@@ -1390,12 +1394,19 @@ bind_mux_data_port_ready (QmiClientWds *client,
     output = qmi_client_wds_bind_mux_data_port_finish (client, res, &error);
     if (!output || !qmi_message_wds_bind_mux_data_port_output_get_result (output, &error)) {
         g_prefix_error (&error, "Couldn't bind mux data port: ");
-        complete_connect (task, NULL, error);
-        return;
+        if (ctx->bind_mux_data_port_retry_count++ >= BIND_MUX_DATA_PORT_RETRY_COUNT_MAX) {
+          /* Give up and go home in shame */
+          complete_connect (task, NULL, error);
+          return;
+        }
+
+        /* Pause and try again */
+        g_usleep (BIND_MUX_DATA_PORT_RETRY_SLEEP_US);
+    } else {
+      /* Keep on */
+      ctx->step++;
     }
 
-    /* Keep on */
-    ctx->step++;
     connect_context_step (task);
 }
 
