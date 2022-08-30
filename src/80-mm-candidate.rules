@@ -24,7 +24,7 @@ KERNEL=="cdc-wdm[0-9]*", SUBSYSTEM=="usbmisc", ENV{ID_MM_CANDIDATE}="1"
 #  - FIREHOSE ports are used for firmware updates and not managed by ModemManager
 SUBSYSTEMS=="usb", GOTO="mm_candidate_end"
 SUBSYSTEM=="wwan", ENV{DEVTYPE}=="wwan_dev", GOTO="mm_candidate_end"
-SUBSYSTEM=="wwan", GOTO="mm_candidate_end"
+SUBSYSTEM=="wwan", ENV{ID_MM_CANDIDATE}="0", GOTO="mm_candidate_end"
 SUBSYSTEM=="wwan", ATTR{type}=="AT", ENV{ID_MM_PORT_TYPE_AT_PRIMARY}="1"
 SUBSYSTEM=="wwan", ATTR{type}=="MBIM", ENV{ID_MM_PORT_TYPE_MBIM}="1"
 SUBSYSTEM=="wwan", ATTR{type}=="QMI", ENV{ID_MM_PORT_TYPE_QMI}="1"
