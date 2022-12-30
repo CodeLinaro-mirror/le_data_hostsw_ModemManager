@@ -770,7 +770,11 @@ mm_bearer_properties_cmp (MMBearerProperties         *a,
     if (!cmp_str (mm_3gpp_profile_get_apn (a->priv->profile), mm_3gpp_profile_get_apn (b->priv->profile), flags))
         return FALSE;
     if (!cmp_ip_type (mm_3gpp_profile_get_ip_type (a->priv->profile), mm_3gpp_profile_get_ip_type (b->priv->profile), flags))
-        return FALSE;
+    {
+        /* If the first bearer is IPv4v6 and second bearer being compared is any single IP / dual IP family, consider it matched*/
+        if (mm_3gpp_profile_get_ip_type (a->priv->profile) != MM_BEARER_IP_FAMILY_IPV4V6)
+            return FALSE;
+    }
     if (!cmp_allowed_auth (mm_3gpp_profile_get_allowed_auth (a->priv->profile), mm_3gpp_profile_get_allowed_auth (b->priv->profile), flags))
         return FALSE;
     if (!cmp_str (mm_3gpp_profile_get_user (a->priv->profile), mm_3gpp_profile_get_user (b->priv->profile), flags))
