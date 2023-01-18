@@ -47,6 +47,9 @@ struct _MMBearerPropertiesPrivate {
     /* Roaming allowance */
     gboolean allow_roaming_set;
     gboolean allow_roaming;
+    /* Mux ID and interface info */
+    gint mux_id;
+    gchar *interface;
     /* Protocol of the Rm interface */
     MMModemCdmaRmProtocol rm_protocol;
     /* Multiplex support */
@@ -325,6 +328,35 @@ mm_bearer_properties_get_profile_id (MMBearerProperties *self)
     return mm_3gpp_profile_get_profile_id (self->priv->profile);
 }
 
+gint
+mm_bearer_properties_get_mux_id (MMBearerProperties *self)
+{
+    g_return_if_fail (MM_IS_BEARER_PROPERTIES (self));
+    return self->priv->mux_id;
+}
+void
+mm_bearer_properties_set_mux_id (MMBearerProperties *self,
+                                 gint                mux_id)
+{
+    g_return_if_fail (MM_IS_BEARER_PROPERTIES (self));
+    self->priv->mux_id = mux_id;
+}
+
+void
+mm_bearer_properties_set_interface(MMBearerProperties *self,
+                                   const gchar*       interface)
+{
+    g_return_val_if_fail (MM_IS_BEARER_PROPERTIES (self), NULL);
+    self->priv->interface = g_strdup(interface);
+}
+
+const gchar*
+mm_bearer_properties_get_interface (MMBearerProperties *self)
+{
+    g_return_if_fail (MM_IS_BEARER_PROPERTIES (self));
+    return self->priv->interface;
+
+}
 /*****************************************************************************/
 
 /**
@@ -773,7 +805,12 @@ mm_bearer_properties_cmp (MMBearerProperties         *a,
     {
         /* If the first bearer is IPv4v6 and second bearer being compared is any single IP / dual IP family, consider it matched*/
         if (mm_3gpp_profile_get_ip_type (a->priv->profile) != MM_BEARER_IP_FAMILY_IPV4V6)
-            return FALSE;
+        {
+             g_print("Setting mux ID as %d and interface as: %s\n", mm_bearer_properties_get_mux_id(a), mm_bearer_properties_get_interface(a));
+             mm_bearer_properties_set_mux_id(b, mm_bearer_properties_get_mux_id(a));
+             mm_bearer_properties_set_interface(b, mm_bearer_properties_get_interface(a));
+             return FALSE;
+        }
     }
     if (!cmp_allowed_auth (mm_3gpp_profile_get_allowed_auth (a->priv->profile), mm_3gpp_profile_get_allowed_auth (b->priv->profile), flags))
         return FALSE;

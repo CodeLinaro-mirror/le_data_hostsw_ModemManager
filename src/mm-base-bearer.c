@@ -470,6 +470,7 @@ bearer_reset_interface_status (MMBaseBearer *self)
     mm_gdbus_bearer_set_connected (MM_GDBUS_BEARER (self), FALSE);
     mm_gdbus_bearer_set_suspended (MM_GDBUS_BEARER (self), FALSE);
     mm_gdbus_bearer_set_interface (MM_GDBUS_BEARER (self), NULL);
+    mm_gdbus_bearer_set_mux_id(MM_GDBUS_BEARER (self), MM_BEARER_MUX_ID_UNKNOWN);
     mm_gdbus_bearer_set_ip4_config (
         MM_GDBUS_BEARER (self),
         mm_bearer_ip_config_get_dictionary (NULL));
@@ -526,6 +527,7 @@ bearer_update_status_connected (MMBaseBearer     *self,
                                 const gchar      *interface,
                                 gboolean          multiplexed,
                                 gint              profile_id,
+                                gint              mux_id,
                                 MMBearerIpConfig *ipv4_config,
                                 MMBearerIpConfig *ipv6_config)
 {
@@ -534,6 +536,7 @@ bearer_update_status_connected (MMBaseBearer     *self,
     mm_gdbus_bearer_set_connected (MM_GDBUS_BEARER (self), TRUE);
     mm_gdbus_bearer_set_suspended (MM_GDBUS_BEARER (self), FALSE);
     mm_gdbus_bearer_set_interface (MM_GDBUS_BEARER (self), interface);
+    mm_gdbus_bearer_set_mux_id    (MM_GDBUS_BEARER (self), mux_id);
     mm_gdbus_bearer_set_ip4_config (
         MM_GDBUS_BEARER (self),
         mm_bearer_ip_config_get_dictionary (ipv4_config));
@@ -896,6 +899,7 @@ connect_ready (MMBaseBearer *self,
             mm_port_get_device (mm_bearer_connect_result_peek_data (result)),
             mm_bearer_connect_result_get_multiplexed (result),
             mm_bearer_connect_result_get_profile_id (result),
+            mm_bearer_connect_result_get_mux_id (result),
             mm_bearer_connect_result_peek_ipv4_config (result),
             mm_bearer_connect_result_peek_ipv6_config (result));
         mm_bearer_connect_result_unref (result);
@@ -1362,6 +1366,17 @@ mm_base_bearer_get_profile_id (MMBaseBearer *self)
     return mm_gdbus_bearer_get_profile_id (MM_GDBUS_BEARER (self));
 }
 
+gint
+mm_base_bearer_get_mux_id (MMBaseBearer *self)
+{
+    return mm_gdbus_bearer_get_mux_id (MM_GDBUS_BEARER (self));
+}
+
+const gchar
+*mm_base_bearer_get_interface (MMBaseBearer *self)
+{
+    return mm_gdbus_bearer_get_interface (MM_GDBUS_BEARER (self));
+}
 /*****************************************************************************/
 
 static void
@@ -1754,6 +1769,7 @@ mm_base_bearer_init (MMBaseBearer *self)
     mm_gdbus_bearer_set_properties  (MM_GDBUS_BEARER (self), NULL);
     mm_gdbus_bearer_set_ip_timeout  (MM_GDBUS_BEARER (self), BEARER_IP_TIMEOUT_DEFAULT);
     mm_gdbus_bearer_set_bearer_type (MM_GDBUS_BEARER (self), MM_BEARER_TYPE_DEFAULT);
+    mm_gdbus_bearer_set_mux_id      (MM_GDBUS_BEARER (self), MM_BEARER_MUX_ID_UNKNOWN);
     mm_gdbus_bearer_set_ip4_config  (MM_GDBUS_BEARER (self),
                                      mm_bearer_ip_config_get_dictionary (NULL));
     mm_gdbus_bearer_set_ip6_config  (MM_GDBUS_BEARER (self),
@@ -1867,6 +1883,7 @@ struct _MMBearerConnectResult {
     MMBearerIpConfig *ipv6_config;
     gboolean          multiplexed;
     gint              profile_id;
+    gint              mux_id;
 };
 
 MMBearerConnectResult *
@@ -1934,6 +1951,19 @@ mm_bearer_connect_result_get_profile_id (MMBearerConnectResult *result)
     return result->profile_id;
 }
 
+void
+mm_bearer_connect_result_set_mux_id (MMBearerConnectResult *result,
+                                         gint                   mux_id)
+{
+    result->mux_id = mux_id;
+}
+
+gint
+mm_bearer_connect_result_get_mux_id (MMBearerConnectResult *result)
+{
+    return result->mux_id;
+}
+
 MMBearerConnectResult *
 mm_bearer_connect_result_new (MMPort           *data,
                               MMBearerIpConfig *ipv4_config,
@@ -1953,5 +1983,6 @@ mm_bearer_connect_result_new (MMPort           *data,
         result->ipv6_config = g_object_ref (ipv6_config);
     result->multiplexed = FALSE; /* default */
     result->profile_id = MM_3GPP_PROFILE_ID_UNKNOWN;
+    result->mux_id = MM_BEARER_MUX_ID_UNKNOWN;
     return result;
 }

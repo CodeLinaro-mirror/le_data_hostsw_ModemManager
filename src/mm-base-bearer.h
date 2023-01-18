@@ -53,7 +53,9 @@ gboolean               mm_bearer_connect_result_get_multiplexed  (MMBearerConnec
 void                   mm_bearer_connect_result_set_profile_id   (MMBearerConnectResult *result,
                                                                   gint                   profile_id);
 gint                   mm_bearer_connect_result_get_profile_id   (MMBearerConnectResult *result);
-
+gint                   mm_bearer_connect_result_get_mux_id       (MMBearerConnectResult *result);
+void                   mm_bearer_connect_result_set_mux_id       (MMBearerConnectResult *result,
+                                                                  gint                   mux_id);
 /*****************************************************************************/
 
 /* Default timeout values to be used in the steps of a connection or
@@ -189,6 +191,8 @@ MMBearerStatus      mm_base_bearer_get_status     (MMBaseBearer *self);
 MMBearerProperties *mm_base_bearer_peek_config    (MMBaseBearer *self);
 MMBearerProperties *mm_base_bearer_get_config     (MMBaseBearer *self);
 gint                mm_base_bearer_get_profile_id (MMBaseBearer *self);
+gint                mm_base_bearer_get_mux_id     (MMBaseBearer *self);
+const gchar        *mm_base_bearer_get_interface  (MMBaseBearer *self);
 
 void     mm_base_bearer_connect        (MMBaseBearer *self,
                                         GAsyncReadyCallback callback,

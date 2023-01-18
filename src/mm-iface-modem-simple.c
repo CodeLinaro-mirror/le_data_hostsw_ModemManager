@@ -588,7 +588,8 @@ connection_step (ConnectionContext *ctx)
 
         bearer_properties = mm_simple_connect_properties_get_bearer_properties (ctx->properties);
 
-        /* Check if the bearer we want to create is already in the list */
+        /* Check if the bearer we want to create is already in the list and if it is similar to one
+            bearer then store the mux ID and interface */
         ctx->bearer = mm_bearer_list_find_by_properties (ctx->bearer_list, bearer_properties);
         if (!ctx->bearer) {
             mm_obj_dbg (ctx->self, "creating new bearer...");

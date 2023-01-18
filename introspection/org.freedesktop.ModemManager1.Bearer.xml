@@ -366,6 +366,15 @@
     <property name="IpTimeout" type="u" access="read" />
 
     <!--
+        MuxId:
+
+        Mux ID used for call establishment.
+
+        Since: 1.0
+    -->
+    <property name="MuxId" type="u" access="read" />
+
+    <!--
         BearerType:
 
         A <link linkend="MMBearerType">MMBearerType</link>

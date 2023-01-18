@@ -26,6 +26,7 @@
 
 G_BEGIN_DECLS
 
+#define MM_BEARER_MUX_ID_UNKNOWN -1
 #define MM_TYPE_BEARER_PROPERTIES            (mm_bearer_properties_get_type ())
 #define MM_BEARER_PROPERTIES(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_BEARER_PROPERTIES, MMBearerProperties))
 #define MM_BEARER_PROPERTIES_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  MM_TYPE_BEARER_PROPERTIES, MMBearerPropertiesClass))
@@ -79,6 +80,10 @@ void mm_bearer_properties_set_rm_protocol   (MMBearerProperties *self,
                                              MMModemCdmaRmProtocol protocol);
 void mm_bearer_properties_set_multiplex     (MMBearerProperties       *self,
                                              MMBearerMultiplexSupport  multiplex);
+void mm_bearer_properties_set_mux_id        (MMBearerProperties *self,
+                                             gint mux_id);
+void mm_bearer_properties_set_interface     (MMBearerProperties *self,
+                                             const gchar *interface);
 
 const gchar              *mm_bearer_properties_get_apn           (MMBearerProperties *self);
 MMBearerAllowedAuth       mm_bearer_properties_get_allowed_auth  (MMBearerProperties *self);
@@ -87,6 +92,8 @@ const gchar              *mm_bearer_properties_get_password      (MMBearerProper
 MMBearerIpFamily          mm_bearer_properties_get_ip_type       (MMBearerProperties *self);
 MMBearerApnType           mm_bearer_properties_get_apn_type      (MMBearerProperties *self);
 gint                      mm_bearer_properties_get_profile_id    (MMBearerProperties *self);
+gint                      mm_bearer_properties_get_mux_id        (MMBearerProperties *self);
+const gchar              *mm_bearer_properties_get_interface     (MMBearerProperties *self);
 gboolean                  mm_bearer_properties_get_allow_roaming (MMBearerProperties *self);
 MMModemCdmaRmProtocol     mm_bearer_properties_get_rm_protocol   (MMBearerProperties *self);
 MMBearerMultiplexSupport  mm_bearer_properties_get_multiplex     (MMBearerProperties *self);

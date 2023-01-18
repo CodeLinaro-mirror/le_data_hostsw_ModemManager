@@ -1743,7 +1743,8 @@ connect_context_step (GTask *task)
     case CONNECT_STEP_SETUP_LINK:
         /* if muxing has been enabled in the port, we need to create a new link
          * interface. */
-        if (MM_PORT_QMI_DAP_IS_SUPPORTED_QMAP (ctx->dap)) {
+
+       if (MM_PORT_QMI_DAP_IS_SUPPORTED_QMAP (ctx->dap)) {
             mm_port_qmi_setup_link (ctx->qmi,
                                     ctx->data,
                                     ctx->link_prefix_hint,
@@ -1841,6 +1842,7 @@ connect_context_step (GTask *task)
             g_autoptr(QmiMessageWdsBindMuxDataPortInput) input = NULL;
 
             mm_obj_dbg (self, "binding to mux id %d", ctx->mux_id);
+
             input = qmi_message_wds_bind_mux_data_port_input_new ();
             qmi_message_wds_bind_mux_data_port_input_set_endpoint_info (
                 input,
@@ -2122,7 +2124,7 @@ connect_context_step (GTask *task)
                                                        ctx->ipv4_config,
                                                        ctx->ipv6_config);
         mm_bearer_connect_result_set_multiplexed (connect_result, !!ctx->link);
-
+        mm_bearer_connect_result_set_mux_id (connect_result, ctx->mux_id);
         if (ctx->profile_id != MM_3GPP_PROFILE_ID_UNKNOWN)
             mm_bearer_connect_result_set_profile_id (connect_result, ctx->profile_id);
 
@@ -2152,6 +2154,7 @@ load_settings_from_bearer (MMBearerQmi         *self,
     MMBearerAllowedAuth  bearer_auth;
     GError              *inner_error = NULL;
     const gchar         *str;
+    gint                 mux_id;
     const gchar         *data_port_driver;
 
     data_port_driver = mm_kernel_device_get_driver (mm_port_peek_kernel_device (ctx->data));
@@ -2208,7 +2211,18 @@ load_settings_from_bearer (MMBearerQmi         *self,
     /* IP type settings */
     if (!load_ip_type_settings_from_profile (ctx, mm_bearer_properties_peek_3gpp_profile (properties), error))
         return FALSE;
-
+    /* Mux ID value storage */
+    mux_id = mm_bearer_properties_get_mux_id(properties);
+    if (mux_id > 0)
+    {
+        ctx->mux_id = mux_id;
+        str = mm_bearer_properties_get_interface(properties);
+        ctx->link_name = g_strdup(str);
+        if(ctx->link_name)
+            ctx->link = mm_base_modem_peek_port (modem, ctx->link_name);
+        g_print("Value of mux ID is : %d interface : %s", ctx->mux_id, ctx->link_name);
+        ctx->step = CONNECT_STEP_IP_METHOD;
+    }
     /* Auth settings; in we treat user/password empty strings as no strings */
     str = mm_bearer_properties_get_user (properties);
     if (str && str[0])
