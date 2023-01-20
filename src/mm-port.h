@@ -58,6 +58,8 @@ typedef enum { /*< underscore_name=mm_port_type >*/
 #define MM_PORT_SUBSYS        "subsys"
 #define MM_PORT_TYPE          "type"
 #define MM_PORT_CONNECTED     "connected"
+#define MM_PORT_V4_CONNECTED  "v4_connected"
+#define MM_PORT_V6_CONNECTED  "v6_connected"
 #define MM_PORT_KERNEL_DEVICE "kernel-device"
 
 typedef struct _MMPort MMPort;
@@ -80,7 +82,11 @@ const gchar    *mm_port_get_device         (MMPort *self);
 MMPortSubsys    mm_port_get_subsys         (MMPort *self);
 MMPortType      mm_port_get_port_type      (MMPort *self);
 gboolean        mm_port_get_connected      (MMPort *self);
+gboolean        mm_port_get_v4_connected   (MMPort *self);
+gboolean        mm_port_get_v6_connected   (MMPort *self);
 void            mm_port_set_connected      (MMPort *self, gboolean connected);
+void            mm_port_set_v4_connected   (MMPort *self, gboolean connected);
+void            mm_port_set_v6_connected   (MMPort *self, gboolean connected);
 MMKernelDevice *mm_port_peek_kernel_device (MMPort *self);
 
 #endif /* MM_PORT_H */

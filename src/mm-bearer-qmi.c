@@ -2076,6 +2076,10 @@ connect_context_step (GTask *task)
 
         /* Port is connected; update the state */
         mm_port_set_connected (ctx->link ? ctx->link : ctx->data, TRUE);
+        if(ctx->packet_data_handle_ipv4)
+	   mm_port_set_v4_connected (ctx->link, TRUE);
+	if(ctx->packet_data_handle_ipv6)
+	   mm_port_set_v6_connected (ctx->link, TRUE);
 
         /* Keep connection related data */
 
@@ -2381,6 +2385,7 @@ reset_bearer_connection (MMBearerQmi *self,
 {
     if (reset_ipv4) {
         if (self->priv->client_ipv4) {
+            mm_port_set_v4_connected(self->priv->link, FALSE);
             if (self->priv->packet_service_status_ipv4_indication_id)
                 common_setup_cleanup_packet_service_status_unsolicited_events (self,
                                                                                self->priv->client_ipv4,
@@ -2397,6 +2402,7 @@ reset_bearer_connection (MMBearerQmi *self,
 
     if (reset_ipv6) {
         if (self->priv->client_ipv6) {
+            mm_port_set_v6_connected(self->priv->link, FALSE);
             if (self->priv->packet_service_status_ipv6_indication_id)
                 common_setup_cleanup_packet_service_status_unsolicited_events (self,
                                                                                self->priv->client_ipv6,
@@ -2412,32 +2418,36 @@ reset_bearer_connection (MMBearerQmi *self,
     }
 
     if (!self->priv->packet_data_handle_ipv4 && !self->priv->packet_data_handle_ipv6) {
-        if (self->priv->data) {
-            /* Port is disconnected; update the state */
-            mm_port_set_connected (self->priv->data, FALSE);
-            g_clear_object (&self->priv->data);
-        }
-        if (self->priv->link) {
-            g_assert (self->priv->qmi);
-            /* Link is disconnected; update the state */
-            mm_port_set_connected (self->priv->link, FALSE);
-            mm_port_qmi_cleanup_link (self->priv->qmi,
-                                      mm_port_get_device (self->priv->link),
-                                      self->priv->mux_id,
-                                      NULL,
-                                      NULL);
-            g_clear_object (&self->priv->link);
-        }
-        self->priv->mux_id = QMI_DEVICE_MUX_ID_UNBOUND;
-
-        /* Close port if we had it explicitly open for this connection */
-        if (self->priv->qmi) {
-            if (self->priv->explicit_qmi_open) {
-                self->priv->explicit_qmi_open = FALSE;
-                mm_port_qmi_close (self->priv->qmi, NULL, NULL);
+        /* If one of the IP families are connected still on the link, we shouldnt disconnect the ports.*/
+        if( !(mm_port_get_v4_connected(self->priv->link) || mm_port_get_v6_connected(self->priv->link) ) ) {
+            if (self->priv->data) {
+               /* Port is disconnected; update the state */
+               mm_port_set_connected (self->priv->data, FALSE);
+               g_clear_object (&self->priv->data);
             }
-            g_clear_object (&self->priv->qmi);
-        }
+            if (self->priv->link) {
+              g_assert (self->priv->qmi);
+              /* Link is disconnected; update the state */
+              mm_port_set_connected (self->priv->link, FALSE);
+              mm_port_qmi_cleanup_link (self->priv->qmi,
+                                        mm_port_get_device (self->priv->link),
+                                        self->priv->mux_id,
+                                        NULL,
+                                        NULL);
+              g_clear_object (&self->priv->link);
+            }
+
+            /* Close port if we had it explicitly open for this connection */
+          if (self->priv->qmi) {
+               if (self->priv->explicit_qmi_open) {
+                  self->priv->explicit_qmi_open = FALSE;
+                  mm_port_qmi_close (self->priv->qmi, NULL, NULL);
+               }
+               g_clear_object (&self->priv->qmi);
+          }
+       }
+       /* Still for the bearer, we will reset Mux ID */
+       self->priv->mux_id = QMI_DEVICE_MUX_ID_UNBOUND;
     }
 }
 

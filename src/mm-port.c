@@ -33,6 +33,8 @@ enum {
     PROP_SUBSYS,
     PROP_TYPE,
     PROP_CONNECTED,
+    PROP_V4_CONNECTED,
+    PROP_V6_CONNECTED,
     PROP_KERNEL_DEVICE,
     LAST_PROP
 };
@@ -42,6 +44,8 @@ struct _MMPortPrivate {
     MMPortSubsys subsys;
     MMPortType ptype;
     gboolean connected;
+    gboolean v4_connected;
+    gboolean v6_connected;
     MMKernelDevice *kernel_device;
 };
 
@@ -83,6 +87,24 @@ mm_port_get_connected (MMPort *self)
     return self->priv->connected;
 }
 
+gboolean
+mm_port_get_v4_connected(MMPort *self)
+{
+   g_return_val_if_fail (self != NULL, FALSE);
+   g_return_val_if_fail (MM_IS_PORT (self), FALSE);
+
+   return self->priv->v4_connected;
+}
+
+gboolean
+mm_port_get_v6_connected(MMPort *self)
+{
+   g_return_val_if_fail (self != NULL, FALSE);
+   g_return_val_if_fail (MM_IS_PORT (self), FALSE);
+
+   return self->priv->v6_connected;
+}
+
 void
 mm_port_set_connected (MMPort *self, gboolean connected)
 {
@@ -94,6 +116,26 @@ mm_port_set_connected (MMPort *self, gboolean connected)
         g_object_notify (G_OBJECT (self), MM_PORT_CONNECTED);
         mm_obj_dbg (self, "port now %s", connected ? "connected" : "disconnected");
     }
+}
+
+void
+mm_port_set_v4_connected (MMPort *self, gboolean connected)
+{
+    g_return_if_fail (self != NULL);
+    g_return_if_fail (MM_IS_PORT (self));
+
+    self->priv->v4_connected = connected;
+    mm_obj_dbg (self, "v4 call now %s", connected ? "connected" : "disconnected");
+}
+
+void
+mm_port_set_v6_connected (MMPort *self, gboolean connected)
+{
+    g_return_if_fail (self != NULL);
+    g_return_if_fail (MM_IS_PORT (self));
+
+    self->priv->v6_connected = connected;
+    mm_obj_dbg (self, "v6 call now %s", connected ? "connected" : "disconnected");
 }
 
 MMKernelDevice *
@@ -262,6 +304,22 @@ mm_port_class_init (MMPortClass *klass)
                                "Is connected for data and not usable for control",
                                FALSE,
                                G_PARAM_READWRITE));
+
+    g_object_class_install_property
+        (object_class, PROP_V4_CONNECTED,
+         g_param_spec_boolean (MM_PORT_V4_CONNECTED,
+                               "v4_connected",
+                               "v4_calls on net device",
+                               FALSE,
+                               G_PARAM_READWRITE));
+
+    g_object_class_install_property
+        (object_class, PROP_V6_CONNECTED,
+	 g_param_spec_boolean (MM_PORT_V6_CONNECTED,
+		              "v6_connected",
+			      "v6 calls on net device",
+			      FALSE,
+			      G_PARAM_READWRITE));
 
     g_object_class_install_property
         (object_class, PROP_KERNEL_DEVICE,
