@@ -2478,6 +2478,15 @@ stop_network_ready (QmiClientWds *client,
         }
     }
 
+    if(error) {
+        if (error->code == QMI_PROTOCOL_ERROR_FLOW_SUSPENDED) {
+            g_print("Error message is %d %s and can ignore this error\n", error->code, error->message);
+            g_error_free (error);
+            error = NULL;
+        }
+    }
+
+
     if (error) {
         if (ctx->running_ipv4)
             ctx->error_ipv4 = error;

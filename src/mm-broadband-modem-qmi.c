@@ -12021,7 +12021,6 @@ qmi_device_removed_cb (QmiDevice *device,
     self->priv->qmi_device_removed_id = 0;
 
     mm_base_modem_set_reprobe (MM_BASE_MODEM (self), TRUE);
-    mm_base_modem_set_valid (MM_BASE_MODEM (self), FALSE);
 }
 
 static gboolean
