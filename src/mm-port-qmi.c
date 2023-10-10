@@ -918,7 +918,7 @@ internal_reset (MMPortQmi           *self,
                 mm_port_get_device (ctx->data));
     mm_port_net_link_setup (MM_PORT_NET (ctx->data),
                             FALSE,
-                            MM_PORT_NET_MTU_DEFAULT,
+                            0, /*ignore mtu*/
                             NULL,
                             (GAsyncReadyCallback) net_link_down_ready,
                             task);
