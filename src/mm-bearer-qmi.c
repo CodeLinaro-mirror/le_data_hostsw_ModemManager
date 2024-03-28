@@ -2383,6 +2383,7 @@ reset_bearer_connection (MMBearerQmi *self,
                          gboolean reset_ipv4,
                          gboolean reset_ipv6)
 {
+    MMBearerProperties* properties;
     if (reset_ipv4) {
         if (self->priv->client_ipv4) {
             mm_port_set_v4_connected(self->priv->link, FALSE);
@@ -2416,7 +2417,6 @@ reset_bearer_connection (MMBearerQmi *self,
         self->priv->packet_data_handle_ipv6 = 0;
         g_clear_object (&self->priv->client_ipv6);
     }
-
     if (!self->priv->packet_data_handle_ipv4 && !self->priv->packet_data_handle_ipv6) {
         /* If one of the IP families are connected still on the link, we shouldnt disconnect the ports.*/
         if( !(mm_port_get_v4_connected(self->priv->link) || mm_port_get_v6_connected(self->priv->link) ) ) {
@@ -2448,6 +2448,9 @@ reset_bearer_connection (MMBearerQmi *self,
        }
        /* Still for the bearer, we will reset Mux ID */
        self->priv->mux_id = QMI_DEVICE_MUX_ID_UNBOUND;
+       properties = mm_bearer_get_properties(MM_BEARER(self));
+       if(properties)
+           mm_bearer_properties_set_mux_id(properties, QMI_DEVICE_MUX_ID_UNBOUND);
     }
 }
 
@@ -2465,7 +2468,6 @@ stop_network_ready (QmiClientWds *client,
 
     self = g_task_get_source_object (task);
     ctx = g_task_get_task_data (task);
-
     output = qmi_client_wds_stop_network_finish (client, res, &error);
     if (output &&
         !qmi_message_wds_stop_network_output_get_result (output, &error)) {

@@ -506,7 +506,8 @@ bearer_update_status (MMBaseBearer *self,
         bearer_stats_stop (self);
         /* Stop connection monitoring */
         connection_monitor_stop (self);
-
+        mm_gdbus_bearer_set_mux_id(MM_GDBUS_BEARER(self), MM_BEARER_MUX_ID_UNKNOWN);
+        mm_bearer_properties_set_mux_id(mm_base_bearer_peek_config (MM_BASE_BEARER (self)), MM_BEARER_MUX_ID_UNKNOWN);
         /* Build and log report */
         report = g_string_new (NULL);
         g_string_append_printf (report,
