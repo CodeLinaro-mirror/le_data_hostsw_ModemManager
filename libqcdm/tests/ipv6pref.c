@@ -95,16 +95,16 @@ qcdm_send (int fd, char *buf, size_t len)
 
 	while (i < len) {
 		errno = 0;
-		status = write (fd, &buf[i], 1);
-		if (status < 0) {
-			if (errno == EAGAIN) {
+		status = write (fd, &buf[i], len - i);
+		if (status <= 0) {
+			if (errno == EAGAIN || status == 0) {
 				eagain_count--;
 				if (eagain_count <= 0)
 					return FALSE;
 			} else
 				assert (errno == 0);
 		} else
-			i++;
+			i += status;
 
 		usleep (1000);
 	}
