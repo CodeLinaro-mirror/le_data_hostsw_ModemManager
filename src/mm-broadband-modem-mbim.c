@@ -519,7 +519,7 @@ device_caps_query_ready (MbimDevice   *device,
     GError                         *error = NULL;
     LoadCurrentCapabilitiesContext *ctx;
     MbimDataClass                   caps_data_class = MBIM_DATA_CLASS_NONE;
-    g_autofree gchar               *caps_custom_data_class_str;
+    g_autofree gchar               *caps_custom_data_class_str = NULL;
 
     self = g_task_get_source_object (task);
     ctx  = g_task_get_task_data (task);
