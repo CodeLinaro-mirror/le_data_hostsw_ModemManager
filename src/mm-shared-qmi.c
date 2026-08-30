@@ -6601,21 +6601,22 @@ loc_unlock_location_engine_ready (QmiClientLoc *client,
     QmiMessageLocSetEngineLockOutput *output;
     GError                           *error = NULL;
 
+    self = g_task_get_source_object (task);
+
     output = qmi_client_loc_set_engine_lock_finish (client, res, &error);
     if (!output) {
-        mm_obj_warn (client, "QMI operation failed: %s", error->message);
+        mm_obj_warn (self, "QMI operation failed: %s", error->message);
         g_error_free (error);
     }
 
     if (!qmi_message_loc_set_engine_lock_output_get_result (output, &error)
      && !g_error_matches (error, QMI_PROTOCOL_ERROR, QMI_PROTOCOL_ERROR_NO_PERMISSION)) {
-        mm_obj_warn (client, "Couldn't unlock GPS engine: %s", error->message);
+        mm_obj_warn (self, "Couldn't unlock GPS engine: %s", error->message);
         g_error_free (error);
     }
 
     qmi_message_loc_set_engine_lock_output_unref (output);
 
-    self = g_task_get_source_object (task);
     location_load_capabilities (self, task);
 }
 
@@ -7050,19 +7051,19 @@ loc_register_event_inject_req_ready (QmiClientLoc *client,
     MMSharedQmi                                  *self;
     Private                                      *priv;
 
+    self = g_task_get_source_object (task);
+    priv = get_private (self);
+
     output = qmi_client_loc_register_events_finish (client, res, &error);
     if (!output) {
-        mm_obj_warn (client, "QMI operation failed: %s", error->message);
+        mm_obj_warn (self, "QMI operation failed: %s", error->message);
         goto out;
     }
 
     if (!qmi_message_loc_register_events_output_get_result (output, &error)) {
-        mm_obj_warn (client, "Couldn't not register tracking events: %s", error->message);
+        mm_obj_warn (self, "Couldn't not register tracking events: %s", error->message);
         goto out;
     }
-
-    self = g_task_get_source_object (task);
-    priv = get_private (self);
 
     g_assert (!priv->loc_assistance_inject_time_req_indication_id);
     priv->loc_assistance_inject_time_req_indication_id =
