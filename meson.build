@@ -144,7 +144,24 @@ if get_option('buildtype').contains('debug')
   ])
 endif
 
-add_project_arguments(common_args + cc_args, language: 'c')
+# Look for existing -DMM_DISABLE_DEPRECATED in CFLAGS
+pymodule = import('python3')
+python3 = pymodule.find_python()
+res = run_command(python3, '-c', 'import os; print(os.environ["CFLAGS"])')
+cflags_disable_deprecated = false
+if res.returncode() == 0 and res.stdout().contains('-DMM_DISABLE_DEPRECATED')
+   cflags_disable_deprecated = true
+endif
+
+# Handle deprecation enable/disable
+if get_option('deprecated')
+    cc_args += cc.get_supported_arguments('-Wno-deprecated-declarations')
+else
+    if cflags_disable_deprecated == false
+        cc_args += '-DMM_DISABLE_DEPRECATED'
+    endif
+    cc_args += cc.get_supported_arguments('-Wdeprecated-declarations')
+endif
 
 glib_version = '2.56'
 
@@ -271,6 +288,9 @@ if enable_mbim
 						 ])
     mbim_glib_dep = mbim_glib_proj.get_variable('libmbim_glib_dep')
   endif
+
+  # MM should never use deprecated symbols from the libmibm
+  cc_args += '-DMBIM_DISABLE_DEPRECATED'
 endif
 config_h.set('WITH_MBIM', enable_mbim)
 
@@ -289,6 +309,9 @@ if enable_qmi
 						])
     qmi_glib_dep = qmi_glib_proj.get_variable('libqmi_glib_dep')
   endif
+
+  # MM should never use deprecated symbols from libqmi
+  cc_args += '-DQMI_DISABLE_DEPRECATED'
 endif
 config_h.set('WITH_QMI', enable_qmi)
 
@@ -305,6 +328,8 @@ if enable_qrtr
   qrtr_glib_dep = dependency('qrtr-glib', version: '>= 1.0.0')
 endif
 config_h.set('WITH_QRTR', enable_qrtr)
+
+add_project_arguments(common_args + cc_args, language: 'c')
 
 # Distribution version string
 dist_version = get_option('dist_version')

@@ -208,7 +208,7 @@ build-no-deprecated:
     - export BUILD_QRTR=false
     - export BUILD_QMI=false
     - *prepare_deps
-    - CFLAGS="-DMM_DISABLE_DEPRECATED" meson setup build --prefix=/usr -Dwerror=true -Dgtk_doc=false -Dqmi=false -Dqrtr=false -Dmbim=false
+    - meson setup build --prefix=/usr -Dwerror=true -Dgtk_doc=false -Dqmi=false -Dqrtr=false -Dmbim=false -Ddeprecated=false
     - ninja -C build
     - ninja -C build test
     - ninja -C build install

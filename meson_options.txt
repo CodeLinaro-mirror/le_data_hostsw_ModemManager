@@ -17,6 +17,8 @@ option('systemd_journal', type: 'boolean', value: true, description: 'enable sys
 
 option('polkit', type: 'combo', choices: ['strict', 'permissive', 'no'], value: 'strict', description: 'User auth-polkit configuration option.')
 
+option('deprecated', type: 'boolean', value: true, description: 'build with deprecated symbols')
+
 option('at_command_via_dbus', type: 'boolean', value: false, description: 'enable at commands via d-bus')
 
 option('builtin_plugins', type: 'boolean', value: false, description: 'integrate all built plugins within the daemon binary')
